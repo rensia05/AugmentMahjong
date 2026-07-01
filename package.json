@@ -1,0 +1,15 @@
+{
+  "name": "augmented-riichi-mahjong",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser-based augmented Riichi Mahjong prototype with WebSocket multiplayer.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "check": "node --check index.js && node --check server.js && node --check mahjong.js && node --check scoring.js && node --check rules.js && node --check augments.js && node --check augment-presets.js && node --check custom-augments.js && node --check network.js && node --check script.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

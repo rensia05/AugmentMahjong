@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>증강 마작 프로토타입</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <section class="topbar">
+      <div>
+        <p class="eyebrow">Augmented Mahjong</p>
+        <h1>증강 마작</h1>
+      </div>
+      <div class="round-state" id="phaseBadge">국 시작</div>
+    </section>
+
+    <section class="status-grid">
+      <article class="status-panel">
+        <span>국</span>
+        <strong id="roundNumber">1국</strong>
+      </article>
+      <article class="status-panel">
+        <span>턴</span>
+        <strong id="turnNumber">0</strong>
+      </article>
+      <article class="status-panel">
+        <span>남은 패산</span>
+        <strong id="wallCount">0</strong>
+      </article>
+      <article class="status-panel dora-status">
+        <span>도라 표시패</span>
+        <div class="mini-tiles" id="doraIndicators"></div>
+      </article>
+      <article class="status-panel">
+        <span>현재 점수</span>
+        <strong id="score">동 0</strong>
+      </article>
+    </section>
+
+    <section class="players" id="players"></section>
+
+    <section class="board">
+      <div class="play-area">
+        <div class="section-head">
+          <h2 id="handTitle">손패</h2>
+          <p id="handHint">국 시작 버튼을 눌러 패를 받으세요.</p>
+        </div>
+        <div class="hand" id="hand"></div>
+
+        <div class="section-head discard-head">
+          <h2>전체 버림패</h2>
+          <p id="discardHint">각 플레이어의 버림패가 순서대로 표시됩니다.</p>
+        </div>
+        <div class="discard-river" id="discardRiver"></div>
+      </div>
+
+      <aside class="side-panel">
+        <div class="controls">
+          <div class="game-settings">
+            <label>
+              <span>게임</span>
+              <select id="gameMode">
+                <option value="hanchan">반장전</option>
+                <option value="tonpuu">동풍전</option>
+              </select>
+            </label>
+            <label>
+              <span>시작 점수</span>
+              <input id="startScore" type="number" value="25000" min="1000" step="1000">
+            </label>
+          </div>
+          <button id="startRoundBtn">국 시작</button>
+          <button id="drawBtn" disabled>패 뽑기</button>
+          <button id="chiBtn" disabled>치</button>
+          <button id="ponBtn" disabled>퐁</button>
+          <button id="kanBtn" disabled>깡</button>
+          <button id="riichiBtn" disabled>리치</button>
+          <button id="ronBtn" disabled>론</button>
+          <button id="winBtn" disabled>화료</button>
+          <button id="endRoundBtn" disabled>국 종료</button>
+        </div>
+
+        <div class="online-panel">
+          <h2>온라인 멀티</h2>
+          <div class="online-controls">
+            <input id="serverUrl" type="text" placeholder="서버 URL 또는 비워두기" aria-label="서버 주소">
+            <button id="connectBtn" type="button">연결</button>
+          </div>
+          <div class="online-controls">
+            <input id="roomCode" type="text" placeholder="방 코드" aria-label="방 코드">
+            <button id="createRoomBtn" type="button">방 만들기</button>
+          </div>
+          <div class="online-controls">
+            <button id="joinRoomBtn" type="button">방 참가</button>
+            <button id="leaveRoomBtn" type="button">나가기</button>
+          </div>
+          <p id="onlineStatus">로컬 모드</p>
+        </div>
+
+        <div class="active-augments">
+          <h2 id="augmentTitle">현재 플레이어 증강</h2>
+          <div id="activeAugments" class="augment-list empty">아직 선택한 증강이 없습니다.</div>
+        </div>
+
+        <div class="log-panel">
+          <h2>진행 로그</h2>
+          <div id="log" class="log"></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="augment-modal hidden" id="augmentModal" aria-live="polite">
+      <div class="augment-picker">
+        <div class="section-head">
+          <h2>증강 선택</h2>
+          <p>이번 국에 적용할 특수 규칙을 하나 고르세요.</p>
+        </div>
+        <div class="augment-options" id="augmentOptions"></div>
+      </div>
+    </section>
+
+    <section class="augment-modal hidden" id="rewardModal" aria-live="polite">
+      <div class="augment-picker">
+        <div class="section-head">
+          <h2 id="rewardTitle">국 보상 선택</h2>
+          <p id="rewardText">다음 국을 위한 보상을 하나 고르세요.</p>
+        </div>
+        <div class="augment-options" id="rewardOptions"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="mahjong.js"></script>
+  <script src="scoring.js"></script>
+  <script src="rules.js"></script>
+  <script src="augments.js"></script>
+  <script src="augment-presets.js"></script>
+  <script src="custom-augments.js"></script>
+  <script src="network.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
