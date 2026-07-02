@@ -68,6 +68,7 @@ const els = {
   createRoomBtn: document.querySelector("#createRoomBtn"),
   joinRoomBtn: document.querySelector("#joinRoomBtn"),
   leaveRoomBtn: document.querySelector("#leaveRoomBtn"),
+  disconnectBtn: document.querySelector("#disconnectBtn"),
   onlineStatus: document.querySelector("#onlineStatus"),
   augmentTitle: document.querySelector("#augmentTitle"),
   activeAugments: document.querySelector("#activeAugments"),
@@ -108,6 +109,7 @@ els.connectBtn.addEventListener("click", () => connectOnlineServer());
 els.createRoomBtn.addEventListener("click", () => network.createRoom(els.roomCode.value.trim()));
 els.joinRoomBtn.addEventListener("click", () => network.joinRoom(els.roomCode.value.trim()));
 els.leaveRoomBtn.addEventListener("click", () => network.leaveRoom());
+els.disconnectBtn.addEventListener("click", () => network.disconnect());
 
 loadSavedServerUrl();
 render();
@@ -866,6 +868,7 @@ function render() {
   els.createRoomBtn.disabled = !network.isConnected();
   els.joinRoomBtn.disabled = !network.isConnected();
   els.leaveRoomBtn.disabled = !network.isConnected() || !network.isInRoom();
+  els.disconnectBtn.disabled = !network.isConnected();
   els.drawBtn.disabled = state.phase !== "playing" || state.discardsRequired > 0 || !canControlActivePlayer();
   els.chiBtn.disabled = !canCurrentPlayerChi() || !canControlActivePlayer();
   const ponClaim = getPonClaimInfo();

@@ -6,6 +6,16 @@
     let hostId = "";
     let roomId = "";
 
+    function resetConnectionState(status) {
+      socket = null;
+      clientId = "";
+      clientRoster = [];
+      hostId = "";
+      roomId = "";
+      onStatus(status);
+      if (onRoom) onRoom({ roomId, hostId, clients: [] });
+    }
+
     return {
       connect(url) {
         if (!window.WebSocket) {
@@ -18,7 +28,7 @@
         onStatus("연결 시도 중");
 
         socket.addEventListener("open", () => onStatus("온라인 연결됨"));
-        socket.addEventListener("close", () => onStatus("연결 종료"));
+        socket.addEventListener("close", () => resetConnectionState("연결 종료"));
         socket.addEventListener("error", () => onStatus("연결 오류"));
         socket.addEventListener("message", event => {
           try {
@@ -71,6 +81,13 @@
       },
       leaveRoom() {
         this.send("leaveRoom", {});
+      },
+      disconnect() {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.close();
+        } else {
+          resetConnectionState("연결 종료");
+        }
       },
       isConnected() {
         return Boolean(socket && socket.readyState === WebSocket.OPEN);
