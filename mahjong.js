@@ -103,6 +103,10 @@
     return tile.suit === "honor" || tile.number === 1 || tile.number === 9;
   }
 
+  function isWindTile(tile) {
+    return tile.suit === "honor" && (windOrder.includes(tile.label) || Boolean(tile.globalWind));
+  }
+
   function countDistinctTerminalHonor(hand) {
     return new Set(hand.filter(isTerminalOrHonor).map(tile => tile.code)).size;
   }
@@ -194,6 +198,7 @@
     getDoraTiles,
     countDora,
     isTerminalOrHonor,
+    isWindTile,
     countDistinctTerminalHonor,
     findKanCandidate,
     canPon,

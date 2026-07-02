@@ -103,3 +103,27 @@ createCustomAugment({
 ```
 
 복잡한 증강은 `registerAugment`로 `onDraw`, `onDiscard`, `onRoundEnd`, `onWin`, `onKan`, `onCall` 훅을 직접 작성하면 됩니다.
+
+`onDiscard(ctx, tile)`에서는 버린 자리 정보를 바로 사용할 수 있습니다.
+
+```js
+onDiscard(ctx, tile) {
+  if (ctx.seatWind === "동") ctx.addScore(80, "동가 버림 보너스");
+  if (ctx.isDiscardedFrom("남")) ctx.addScore(80, "남가 버림 보너스");
+}
+```
+
+모두에게 적용되는 공통 특수 규칙은 `registerGlobalRule`로 추가합니다. 공통 규칙은 게임 시작 때 선택되고, 동장/남장처럼 게임 라운드를 추가할 수 있습니다.
+기본 후보에는 `없음`도 포함되어 있어서, 공통 특수 규칙 없이 게임이 시작될 수도 있습니다.
+
+```js
+window.AugmentSystem.registerGlobalRule({
+  id: "global_example",
+  name: "공통 규칙 예시",
+  description: "모두에게 적용되는 규칙입니다.",
+  dragonWindLabels: ["백", "발", "중"],
+  extraRoundWinds: ["백", "중", "발"]
+});
+```
+
+공통 규칙으로 풍패 취급이 바뀐 경우 커스텀 증강에서는 `ctx.isWindTile(tile)`을 쓰면 됩니다.

@@ -58,6 +58,19 @@
     }
   });
 
+  registerAugment({
+    id: "custom_east_discard_tip",
+    name: "동가 감시",
+    duration: "한 국",
+    scope: "round",
+    rarity: "common",
+    tags: ["자리", "점수"],
+    description: "동가가 패를 버릴 때마다 80점을 얻습니다.",
+    onDiscard(ctx) {
+      if (ctx.isDiscardedFrom("동")) ctx.addScore(80, "동가 감시");
+    }
+  });
+
   // 새 효과 타입 자체를 추가하고 싶으면 registerEffect를 사용하세요.
   registerEffect("score_on_terminal_discard", {
     onDiscard(ctx, tile, augment, config) {

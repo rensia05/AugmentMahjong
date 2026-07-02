@@ -1,5 +1,6 @@
 (function () {
   const registry = [];
+  const globalRuleRegistry = [];
   const effects = {};
 
   const rarityOrder = {
@@ -25,6 +26,17 @@
       scope: "round",
       duration: "한 국",
       ...augment
+    });
+  }
+
+  function registerGlobalRule(rule) {
+    if (!rule.id || globalRuleRegistry.some(item => item.id === rule.id)) return;
+    globalRuleRegistry.push({
+      rarity: "common",
+      tags: [],
+      ...rule,
+      scope: "global",
+      duration: rule.duration || "공통 규칙"
     });
   }
 
@@ -70,9 +82,18 @@
     return registry.map(cloneAugment);
   }
 
+  function listGlobalRules() {
+    return globalRuleRegistry.map(cloneAugment);
+  }
+
   function getAugmentById(id) {
     const augment = registry.find(item => item.id === id);
     return augment ? cloneAugment(augment) : null;
+  }
+
+  function getGlobalRuleById(id) {
+    const rule = globalRuleRegistry.find(item => item.id === id);
+    return rule ? cloneAugment(rule) : null;
   }
 
   function hydrateAugment(saved) {
@@ -106,6 +127,20 @@
       picked.push(cloneAugment(augment));
     });
     return picked;
+  }
+
+  function getGlobalRuleOffer(count, shuffle) {
+    return shuffle(globalRuleRegistry).slice(0, count).map(cloneAugment);
+  }
+
+  function hydrateGlobalRule(saved) {
+    const base = getGlobalRuleById(saved.id);
+    if (!base) return saved;
+    return {
+      ...base,
+      ...saved,
+      tags: [...base.tags]
+    };
   }
 
   function getSynergyTags(player) {
@@ -178,12 +213,17 @@
   window.AugmentSystem = {
     rarityLabel,
     registerAugment,
+    registerGlobalRule,
     registerEffect,
     createCustomAugment,
     listAugments,
+    listGlobalRules,
     getAugmentById,
+    getGlobalRuleById,
     hydrateAugment,
+    hydrateGlobalRule,
     getOffer,
+    getGlobalRuleOffer,
     getSynergyBonuses
   };
 })();

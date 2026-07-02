@@ -1,5 +1,24 @@
 (function () {
-  const { registerAugment, createCustomAugment } = window.AugmentSystem;
+  const { registerAugment, registerGlobalRule, createCustomAugment } = window.AugmentSystem;
+
+  registerGlobalRule({
+    id: "global_none",
+    name: "없음",
+    rarity: "common",
+    tags: ["기본"],
+    description: "이번 게임에는 모두에게 적용되는 공통 특수 규칙이 없습니다.",
+    extraRoundWinds: []
+  });
+
+  registerGlobalRule({
+    id: "global_dragon_wind_equalizer",
+    name: "자패차별금지",
+    rarity: "rare",
+    tags: ["자패", "공통규칙"],
+    description: "백, 발, 중이 풍패 취급을 받으며 백장, 중장, 발장이 게임 라운드에 추가됩니다.",
+    dragonWindLabels: ["백", "발", "중"],
+    extraRoundWinds: ["백", "중", "발"]
+  });
 
   registerAugment({
     id: "game_suit_builder",

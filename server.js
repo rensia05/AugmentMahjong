@@ -8,7 +8,6 @@ const port = Number(process.env.PORT || 8080);
 const host = process.env.HOST || "0.0.0.0";
 const clients = new Map();
 const rooms = new Map();
-let nextClientNumber = 1;
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -69,8 +68,7 @@ server.on("upgrade", (req, socket) => {
     ""
   ].join("\r\n"));
 
-  const clientId = `P${nextClientNumber}`;
-  nextClientNumber += 1;
+  const clientId = allocateClientId();
   clients.set(socket, { clientId, roomId: "" });
   send(socket, { type: "welcome", payload: { clientId } });
 
@@ -175,6 +173,15 @@ function leaveRoom(socket) {
 function removeClient(socket) {
   leaveRoom(socket);
   clients.delete(socket);
+}
+
+function allocateClientId() {
+  const usedIds = new Set(Array.from(clients.values()).map(client => client.clientId));
+  for (let index = 1; index <= 999; index += 1) {
+    const clientId = `P${index}`;
+    if (!usedIds.has(clientId)) return clientId;
+  }
+  return `P${crypto.randomBytes(2).toString("hex").toUpperCase()}`;
 }
 
 function broadcastRoom(sender, room, message) {

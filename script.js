@@ -23,6 +23,7 @@ const state = {
   doraIndicators: [],
   rinshanTiles: [],
   players: createPlayers(),
+  globalRules: [],
   currentPlayer: 0,
   pickerPlayer: 0,
   rewardPlayer: 0,
@@ -187,6 +188,7 @@ function initializeGame() {
   state.handIndex = 0;
   state.honba = 0;
   state.gameEndedReason = "";
+  state.globalRules = window.AugmentSystem.getGlobalRuleOffer(1, shuffle);
   state.dealer = window.RiichiRules.randomizeSeatWinds(state.players, winds, shuffle);
   assignOnlineSeats();
   state.players.forEach(player => {
@@ -194,6 +196,7 @@ function initializeGame() {
     player.augments = [];
   });
   addLog(`${gameModes[state.gameMode].label} 시작. 시작 점수 ${state.startScore.toLocaleString("ko-KR")}점`);
+  addLog(`공통 규칙: ${state.globalRules.map(rule => rule.name).join(", ") || "없음"}`);
   addLog(`자리 배정: ${state.players.map(player => `${player.name}${player.clientId ? `=${player.clientId}` : ""}`).join(", ")}`);
 }
 
@@ -219,6 +222,7 @@ function resetGame() {
   state.firstTurnDiscards = [];
   state.kanCount = 0;
   state.riichiCount = 0;
+  state.globalRules = [];
   state.gameEndedReason = "";
   state.players = createPlayers();
 }
@@ -559,15 +563,23 @@ function chooseReward(base) {
 function trigger(player, hook, tile = null) {
   const ctx = {
     player,
+    playerIndex: player.id,
+    playerWind: player.wind,
+    seatWind: player.wind,
+    discardedFrom: player.wind,
     wall: state.wall,
     deadWall: state.deadWall,
     doraIndicators: state.doraIndicators,
+    globalRules: state.globalRules,
     drawnTile: state.drawnTile,
     drewFromRinshan: state.drewFromRinshan,
     drawFromWall,
     requireExtraDiscard: () => {
       state.discardsRequired += 1;
     },
+    isDiscardedFrom: wind => player.wind === wind,
+    isDiscardedBy: id => player.id === id,
+    isWindTile: item => isGlobalWindTile(item),
     log: addLog,
     addScore: (amount, source) => addScore(player, amount, source)
   };
@@ -665,7 +677,7 @@ function advanceHand({ keepHonba = false } = {}) {
     state.roundWind += 1;
   }
 
-  if (state.roundWind > gameModes[state.gameMode].endWind) {
+  if (state.roundWind >= getRoundWindLabels().length) {
     finishGame(`${gameModes[state.gameMode].label} 종료`);
   }
 }
@@ -689,12 +701,22 @@ function finishGame(reason) {
 }
 
 function isOorasu() {
-  return state.roundWind === gameModes[state.gameMode].endWind && state.handIndex === 3;
+  return state.roundWind === getRoundWindLabels().length - 1 && state.handIndex === 3;
 }
 
 function getRoundLabel() {
   const oorasu = isOorasu() ? " 오라스" : "";
-  return `${winds[state.roundWind]}${state.handIndex + 1}국 ${state.honba}본장${oorasu}`;
+  return `${getRoundWindLabel()}${state.handIndex + 1}국 ${state.honba}본장${oorasu}`;
+}
+
+function getRoundWindLabel() {
+  return getRoundWindLabels()[state.roundWind] || "?";
+}
+
+function getRoundWindLabels() {
+  const base = winds.slice(0, gameModes[state.gameMode].endWind + 1);
+  const extras = state.globalRules.flatMap(rule => rule.extraRoundWinds || []);
+  return [...base, ...extras];
 }
 
 function getClaimInfo() {
@@ -761,6 +783,13 @@ function addScore(player, amount, source) {
 
 function drawFromWall() {
   return state.wall.pop();
+}
+
+function isGlobalWindTile(tile) {
+  if (window.Mahjong.isWindTile(tile)) return true;
+  return state.globalRules.some(rule => {
+    return (rule.dragonWindLabels || []).includes(tile.label);
+  });
 }
 
 function activePlayer() {
@@ -992,7 +1021,9 @@ function getTileClass(tile, selectable = false, extraClass = "") {
 function renderAugments() {
   const player = activePlayer();
   els.activeAugments.innerHTML = "";
-  if (player.augments.length === 0) {
+  state.globalRules.forEach(rule => els.activeAugments.appendChild(createAugmentCard(rule)));
+
+  if (player.augments.length === 0 && state.globalRules.length === 0) {
     els.activeAugments.className = "augment-list empty";
     els.activeAugments.textContent = "아직 선택한 증강이 없습니다.";
     return;
@@ -1115,6 +1146,7 @@ function createSnapshot() {
     doraIndicators: state.doraIndicators,
     rinshanTiles: state.rinshanTiles,
     players: state.players.map(serializePlayer),
+    globalRules: state.globalRules.map(serializeGlobalRule),
     currentPlayer: state.currentPlayer,
     pickerPlayer: state.pickerPlayer,
     rewardPlayer: state.rewardPlayer,
@@ -1150,6 +1182,7 @@ function applySnapshot(snapshot) {
   state.doraIndicators = snapshot.doraIndicators || [];
   state.rinshanTiles = snapshot.rinshanTiles || [];
   state.players = (snapshot.players || []).map(hydratePlayer);
+  state.globalRules = (snapshot.globalRules || []).map(window.AugmentSystem.hydrateGlobalRule);
   state.currentPlayer = snapshot.currentPlayer || 0;
   state.pickerPlayer = snapshot.pickerPlayer || 0;
   state.rewardPlayer = snapshot.rewardPlayer || 0;
@@ -1192,5 +1225,13 @@ function serializeAugment(augment) {
     scope: augment.scope,
     rarity: augment.rarity,
     tags: augment.tags
+  };
+}
+
+function serializeGlobalRule(rule) {
+  return {
+    id: rule.id,
+    rarity: rule.rarity,
+    tags: rule.tags
   };
 }
